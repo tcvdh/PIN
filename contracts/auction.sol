@@ -82,6 +82,9 @@ contract Auction is Ownable {
         winnerAddress[auctionID] = lastWinner;
         auctionID++;
         lastWinner = currentBidder;
+        if (PIN.balanceOf(address(this)) > 0) {
+            withdraw();
+        }
     }
 
     function finalizeAndStartNewAuction() external onlyOwner {
@@ -89,7 +92,7 @@ contract Auction is Ownable {
         startAuction();
     }
 
-    function withdraw() external onlyOwner {
+    function withdraw() public onlyOwner {
         require(!auctionInProgress, "Auction in progress");
         PIN.transfer(owner(), PIN.balanceOf(address(this)));
     }
