@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 
 contract Auction is Ownable {
-    IERC20 public PIN = IERC20(0xcB8BCDb991B45bF5D78000a0b5C0A6686cE43790);
+    IERC20 public PIN = IERC20(0x0E6dd7EC79912374E4567ed76F8512A8E2343B07);
     mapping(uint256 => address) public winnerAddress;
     mapping(address => string) public userStrings;
     uint256 public auctionID;
