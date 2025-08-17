@@ -99,6 +99,11 @@ contract Auction is Ownable {
         return userStrings[winnerAddress[id]];
     }
 
+    function getLastWinnerString() public view returns(string memory) {
+        require(lastWinner != address(0), "no last winner exists");
+        return userStrings[lastWinner];
+    }
+
     function setStartPrice(uint256 _startPrice) external onlyOwner {
         startPrice = _startPrice;
     }
