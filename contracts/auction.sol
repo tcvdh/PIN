@@ -39,8 +39,8 @@ contract Auction is Ownable {
     }
 
     function bid(uint256 amount, string calldata userString) external {
-        if (bytes(userStrings[msg.sender]).length == 0) {
-            require(bytes(userString).length != 0, "No userString stored or entered");
+        if (bytes(userString).length == 0) {
+            require(bytes(userStrings[msg.sender]).length > 0, "no userString provided");
         } else {
             userStrings[msg.sender] = userString;
         }
