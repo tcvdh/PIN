@@ -67,7 +67,9 @@ contract Auction is Ownable {
     function cancelAuction() external onlyOwner {
         require(auctionInProgress, "No auction in progress");
         auctionInProgress = false;
-        PIN.transfer(currentBidder, currentPrice);
+        if(currentBidder != address(0)) {
+            PIN.transfer(currentBidder, currentPrice);
+        }
         auctionID++;
     }
 
@@ -87,7 +89,7 @@ contract Auction is Ownable {
         startAuction();
     }
 
-    function withdraw() external onlyOwner {
+    function withdraw() public onlyOwner {
         require(!auctionInProgress, "Auction in progress");
         PIN.transfer(owner(), PIN.balanceOf(address(this)));
     }
