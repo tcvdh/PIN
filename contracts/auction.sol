@@ -51,7 +51,7 @@ contract Auction is Ownable {
             userStrings[msg.sender] = userString;
         }
         require(auctionInProgress, "No auction in progress");
-        require(block.timestamp > auctionTimestampStarted + auctionTime, "Auction has ended");
+        require(block.timestamp < auctionTimestampStarted + auctionTime, "Auction has ended");
         require(amount >= currentPrice * (100 + minBidIncrement) / 100, "Bid must be higher than current price + minBidIncrement");
         require(PIN.balanceOf(msg.sender) >= amount, "Insufficient balance");
         require(PIN.allowance(msg.sender, address(this)) >= amount, "Insufficient allowance");
