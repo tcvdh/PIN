@@ -20,6 +20,12 @@ contract Auction is Ownable {
     uint256 public minBidIncrement;
     uint256 public auctionTime;
 
+    event BidPlaced (
+        uint256 indexed auctionId,
+        address indexed bidder,
+        uint256 bidAmount
+    );
+
     constructor() Ownable(msg.sender) {
         auctionInProgress = false;
         startPrice = 0;
@@ -61,6 +67,7 @@ contract Auction is Ownable {
         currentBidder = msg.sender;
         currentPrice = amount;
         PIN.transferFrom(msg.sender, address(this), amount);
+        emit BidPlaced(auctionID, msg.sender, amount);
     }
 
     function cancelAuction() external onlyOwner {
