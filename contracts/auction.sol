@@ -102,7 +102,7 @@ contract Auction is Ownable {
     }
 
     function getLastAuctionDetails() external view returns (address, string memory, uint256) {
-        return(lastWinner, winnerStrings[auctionID - 1], lastWinnerPrice);
+        return(lastWinner, lastWinnerString, lastWinnerPrice);
     }
 
     function getDetailsById(uint256 auctionId) external view returns (address, string memory, uint256) {
