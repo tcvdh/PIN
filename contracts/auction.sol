@@ -8,10 +8,12 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract Auction is Ownable {
     IERC20 public PIN = IERC20(0x0E6dd7EC79912374E4567ed76F8512A8E2343B07);
     mapping(uint256 => address) public winnerAddress;
+    mapping(uint256 => uint256) public winnerPrices;
     mapping(address => string) public userStrings;
     uint256 public auctionID;
     uint256 public auctionTimestampStarted;
     address public lastWinner;
+    uint256 public lastWinnerPrice;
     uint256 public finalCooldown;
     uint256 public startPrice;
     uint256 public currentPrice;
@@ -52,7 +54,11 @@ contract Auction is Ownable {
         }
         require(auctionInProgress, "No auction in progress");
         require(block.timestamp < auctionTimestampStarted + auctionTime, "Auction has ended");
-        require(amount >= currentPrice * (100 + minBidIncrement) / 100, "Bid must be higher than current price + minBidIncrement");
+        if (currentPrice == startPrice) {
+            require(amount >= startPrice, "Bid must be higher or equal to start price");
+        } else {
+            require(amount >= currentPrice * (100 + minBidIncrement) / 100, "Bid must be higher than current price + minBidIncrement");
+        }
         require(PIN.balanceOf(msg.sender) >= amount, "Insufficient balance");
         require(PIN.allowance(msg.sender, address(this)) >= amount, "Insufficient allowance");
 
@@ -88,9 +94,19 @@ contract Auction is Ownable {
         winnerAddress[auctionID] = lastWinner;
         auctionID++;
         lastWinner = currentBidder;
+        lastWinnerPrice = currentPrice;
         if (PIN.balanceOf(address(this)) > 0) {
             withdraw();
         }
+    }
+
+    function getLastAuctionDetails() external view returns (address, string memory, uint256) {
+        return(lastWinner, userStrings[lastWinner] ,lastWinnerPrice);
+    }
+
+    function getDetailsById(uint256 auctionId) external view returns (address, string memory, uint256) {
+        address winner = winnerAddress[auctionId];
+        return(winner, userStrings[winner], winnerPrices[auctionId]);
     }
 
     function finalizeAndStartNewAuction() external onlyOwner {
