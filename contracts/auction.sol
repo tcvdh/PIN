@@ -9,11 +9,13 @@ contract Auction is Ownable {
     IERC20 public PIN = IERC20(0x0E6dd7EC79912374E4567ed76F8512A8E2343B07);
     mapping(uint256 => address) public winnerAddress;
     mapping(uint256 => uint256) public winnerPrices;
-    mapping(address => string) public userStrings;
+    mapping(uint256 => string) public winnerStrings;
+    string public currentString;
     uint256 public auctionID;
     uint256 public auctionTimestampStarted;
     address public lastWinner;
     uint256 public lastWinnerPrice;
+    string public lastWinnerString;
     uint256 public finalCooldown;
     uint256 public startPrice;
     uint256 public currentPrice;
@@ -47,11 +49,7 @@ contract Auction is Ownable {
     }
 
     function bid(uint256 amount, string calldata userString) external {
-        if (bytes(userString).length == 0) {
-            require(bytes(userStrings[msg.sender]).length > 0, "no userString provided");
-        } else {
-            userStrings[msg.sender] = userString;
-        }
+        currentString = userString;
         require(auctionInProgress, "No auction in progress");
         require(block.timestamp < auctionTimestampStarted + auctionTime, "Auction has ended");
         if (currentPrice == startPrice) {
@@ -90,22 +88,25 @@ contract Auction is Ownable {
         require(block.timestamp >= auctionTimestampStarted + auctionTime, "Auction not yet finished");
 
         auctionInProgress = false;
-        winnerAddress[auctionID] = lastWinner;
         auctionID++;
         lastWinner = currentBidder;
         lastWinnerPrice = currentPrice;
+        lastWinnerString = currentString;
+        winnerAddress[auctionID] = lastWinner;
+        winnerPrices[auctionID] = currentPrice;
+        winnerStrings[auctionID] = currentString;
         if (PIN.balanceOf(address(this)) > 0) {
             withdraw();
         }
     }
 
     function getLastAuctionDetails() external view returns (address, string memory, uint256) {
-        return(lastWinner, userStrings[lastWinner], lastWinnerPrice);
+        return(lastWinner, winnerStrings[auctionID - 1], lastWinnerPrice);
     }
 
     function getDetailsById(uint256 auctionId) external view returns (address, string memory, uint256) {
         address winner = winnerAddress[auctionId];
-        return(winner, userStrings[winner], winnerPrices[auctionId]);
+        return(winner, winnerStrings[auctionId], winnerPrices[auctionId]);
     }
 
     function finalizeAndStartNewAuction() external onlyOwner {
@@ -116,16 +117,6 @@ contract Auction is Ownable {
     function withdraw() public onlyOwner {
         require(!auctionInProgress, "Auction in progress");
         PIN.transfer(owner(), PIN.balanceOf(address(this)));
-    }
-
-    function getWinnerString(uint256 id) public view returns(string memory) {
-        require(id <= auctionID, "No auction for ID");
-        return userStrings[winnerAddress[id]];
-    }
-
-    function getLastWinnerString() public view returns(string memory) {
-        require(lastWinner != address(0), "no last winner exists");
-        return userStrings[lastWinner];
     }
 
     function setStartPrice(uint256 _startPrice) external onlyOwner {
