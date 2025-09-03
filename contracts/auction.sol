@@ -90,7 +90,6 @@ contract Auction is Ownable {
         require(block.timestamp >= auctionTimestampStarted + auctionTime, "Auction not yet finished");
 
         auctionInProgress = false;
-        lastWinner = currentBidder;
         winnerAddress[auctionID] = lastWinner;
         auctionID++;
         lastWinner = currentBidder;
@@ -101,7 +100,7 @@ contract Auction is Ownable {
     }
 
     function getLastAuctionDetails() external view returns (address, string memory, uint256) {
-        return(lastWinner, userStrings[lastWinner] ,lastWinnerPrice);
+        return(lastWinner, userStrings[lastWinner], lastWinnerPrice);
     }
 
     function getDetailsById(uint256 auctionId) external view returns (address, string memory, uint256) {
