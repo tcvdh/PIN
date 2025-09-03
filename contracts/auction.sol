@@ -49,7 +49,7 @@ contract Auction is Ownable {
     }
 
     function bid(uint256 amount, string calldata userString) external {
-        currentString = userString;
+        require(bytes(userString).length > 0);
         require(auctionInProgress, "No auction in progress");
         require(block.timestamp < auctionTimestampStarted + auctionTime, "Auction has ended");
         if (currentPrice == startPrice) {
@@ -70,6 +70,7 @@ contract Auction is Ownable {
 
         currentBidder = msg.sender;
         currentPrice = amount;
+        currentString = userString;
         PIN.transferFrom(msg.sender, address(this), amount);
         emit BidPlaced(auctionID, msg.sender, amount);
     }
